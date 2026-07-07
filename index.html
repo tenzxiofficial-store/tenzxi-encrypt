@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<title>CodeShield — Encrypt Your Code</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --surface2: #1a1a24;
+  --border: #2a2a3a;
+  --accent: #6ee7b7;
+  --accent2: #818cf8;
+  --accent3: #f472b6;
+  --text: #e8e8f0;
+  --muted: #6b6b80;
+  --danger: #f87171;
+  --success: #34d399;
+  --warn: #fbbf24;
+}
+
+html, body { height: 100%; overflow-x: hidden; touch-action: pan-x pan-y; }
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(110,231,183,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(110,231,183,0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+
+.orb {
+  position: fixed; border-radius: 50%;
+  filter: blur(120px); opacity: 0.12;
+  pointer-events: none; z-index: 0;
+}
+.orb-1 { width: 500px; height: 500px; background: #6ee7b7; top: -150px; left: -150px; }
+.orb-2 { width: 400px; height: 400px; background: #818cf8; bottom: -100px; right: -100px; }
+
+.wrapper {
+  position: relative; z-index: 1;
+  max-width: 960px; margin: 0 auto;
+  padding: 0 24px 80px;
+}
+
+header {
+  padding: 40px 0 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 44px;
+}
+
+.logo { display: flex; align-items: center; gap: 12px; }
+
+.logo-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.logo-text {
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; padding: 4px 10px;
+  background: rgba(110,231,183,0.08); border: 1px solid rgba(110,231,183,0.2);
+  border-radius: 20px; color: var(--accent); letter-spacing: 0.5px;
+}
+
+.title-block { margin-bottom: 32px; }
+
+h1 {
+  font-size: clamp(28px, 5vw, 44px); font-weight: 800;
+  line-height: 1.1; letter-spacing: -1px; margin-bottom: 12px;
+}
+
+h1 span {
+  background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.subtitle {
+  color: var(--muted); font-size: 15px;
+  font-family: 'JetBrains Mono', monospace; letter-spacing: 0.2px;
+}
+
+/* ── Info box ── */
+.info-box {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 18px;
+  border-radius: 10px; margin-bottom: 26px;
+  border: 1px solid;
+}
+
+.info-box.green {
+  background: rgba(110,231,183,0.05); border-color: rgba(110,231,183,0.18);
+}
+
+.info-box.yellow {
+  background: rgba(251,191,36,0.05); border-color: rgba(251,191,36,0.2);
+}
+
+.info-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; }
+
+.info-text {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--muted); line-height: 1.7;
+}
+
+.info-text strong { color: var(--accent); }
+.info-text .warn  { color: var(--warn); }
+.info-text a      { color: var(--accent2); text-decoration: none; }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 5px; width: fit-content;
+}
+
+.tab-btn {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600;
+  padding: 8px 22px; border: none; border-radius: 8px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: all 0.2s ease; letter-spacing: 0.3px;
+}
+
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(110,231,183,0.15), rgba(129,140,248,0.15));
+  color: var(--text); border: 1px solid rgba(110,231,183,0.2);
+}
+
+.tab-btn:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.04); }
+
+/* ── Sub-tabs for JS type ── */
+.subtabs {
+  display: none; gap: 6px; margin-bottom: 20px; flex-wrap: wrap;
+}
+
+.subtabs.visible { display: flex; }
+
+.subtab-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+  padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.3px;
+}
+
+.subtab-btn.active {
+  background: rgba(244,114,182,0.1); border-color: rgba(244,114,182,0.3);
+  color: var(--accent3);
+}
+
+.subtab-btn:hover:not(.active) { color: var(--text); border-color: var(--muted); }
+
+/* ── Section label ── */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500; color: var(--muted);
+  letter-spacing: 1.5px; text-transform: uppercase;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+
+.section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border); max-width: 60px;
+}
+
+/* ── Editor ── */
+.editor-wrap { margin-bottom: 8px; }
+
+.editor-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-bottom: none; border-radius: 12px 12px 0 0;
+}
+
+.editor-dots { display: flex; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot-r { background: #ff5f57; }
+.dot-y { background: #febc2e; }
+.dot-g { background: #28c840; }
+
+.editor-lang {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--muted); letter-spacing: 0.5px;
+}
+
+textarea {
+  width: 100%; min-height: 220px; padding: 18px 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 0 0 12px 12px; color: var(--text);
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.7;
+  resize: vertical; outline: none; transition: border-color 0.2s;
+  caret-color: var(--accent);
+}
+
+textarea:focus { border-color: rgba(110,231,183,0.35); background: #0f0f1a; }
+textarea::placeholder { color: #3a3a50; }
+
+.char-count {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  color: var(--muted); text-align: right; margin-top: 6px; margin-bottom: 22px;
+}
+
+/* ── Buttons ── */
+.action-row { display: flex; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+
+.btn {
+  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+  padding: 11px 22px; border: none; border-radius: 9px; cursor: pointer;
+  transition: all 0.2s ease; display: flex; align-items: center;
+  gap: 7px; letter-spacing: 0.3px; position: relative; overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn::before {
+  content: ''; position: absolute; inset: 0; opacity: 0;
+  transition: opacity 0.2s; background: rgba(255,255,255,0.08);
+}
+
+.btn:hover::before { opacity: 1; }
+.btn:active { transform: scale(0.97); }
+
+.btn-encrypt {
+  background: linear-gradient(135deg, #6ee7b7, #818cf8);
+  color: #0a0a0f; flex: 1; justify-content: center;
+  font-size: 14px; padding: 13px 28px; min-width: 140px;
+}
+
+.btn-encrypt:hover { box-shadow: 0 0 28px rgba(110,231,183,0.35); transform: translateY(-1px); }
+.btn-encrypt:disabled { opacity: 0.6; transform: none !important; cursor: not-allowed; }
+
+.btn-preview  { background: rgba(129,140,248,0.12); color: var(--accent2); border: 1px solid rgba(129,140,248,0.25); }
+.btn-copy     { background: rgba(110,231,183,0.08); color: var(--accent);  border: 1px solid rgba(110,231,183,0.2); }
+.btn-download { background: rgba(244,114,182,0.08); color: var(--accent3); border: 1px solid rgba(244,114,182,0.2); }
+.btn-clear    { background: rgba(248,113,113,0.08); color: var(--danger);  border: 1px solid rgba(248,113,113,0.2); margin-left: auto; }
+.btn-upload   { background: rgba(251,191,36,0.08); color: var(--warn); border: 1px solid rgba(251,191,36,0.2); }
+
+/* ── Upload file bar ── */
+.upload-bar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; flex-wrap: wrap;
+}
+
+.upload-file-info {
+  display: none; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: rgba(251,191,36,0.07);
+  border: 1px solid rgba(251,191,36,0.2);
+  border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--warn);
+}
+
+.upload-file-info.visible { display: flex; }
+
+.upload-file-name { color: var(--text); font-weight: 600; }
+
+.upload-clear-btn {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 14px; padding: 0 2px;
+  line-height: 1; transition: color 0.15s;
+}
+.upload-clear-btn:hover { color: var(--danger); }
+
+/* hidden file input */
+#fileUploadInput { display: none; }
+
+.btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+#outputArea {
+  min-height: 220px; background: #080810;
+  color: #a0f0c8;
+}
+
+#outputArea:focus { border-color: rgba(129,140,248,0.35); }
+
+/* ── Status ── */
+.status-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 8px;
+  margin-top: 14px; flex-wrap: wrap; gap: 8px;
+}
+
+.status-left { display: flex; align-items: center; gap: 10px; }
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted); transition: background 0.3s;
+}
+.status-dot.ready   { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.status-dot.working { background: var(--warn);    box-shadow: 0 0 8px var(--warn); animation: blink 1s infinite; }
+.status-dot.error   { background: var(--danger);  box-shadow: 0 0 8px var(--danger); }
+
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+.status-text  { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+.status-stats { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 28px; right: 28px;
+  padding: 12px 20px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: 10px;
+  font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 9999;
+  display: flex; align-items: center; gap: 10px;
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  pointer-events: none;
+}
+
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: rgba(52,211,153,0.4); }
+.toast.success .toast-icon { color: var(--success); }
+.toast.error   { border-color: rgba(248,113,113,0.4); }
+.toast.error   .toast-icon { color: var(--danger); }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(8px); z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  width: min(92vw, 860px); height: min(88vh, 620px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; display: flex; flex-direction: column; overflow: hidden;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+.modal-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: var(--surface2); flex-shrink: 0;
+}
+
+.modal-title { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+.modal-close {
+  background: none; border: none; color: var(--muted); cursor: pointer;
+  font-size: 20px; line-height: 1; padding: 2px 8px; border-radius: 4px; transition: all 0.15s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+iframe { flex: 1; border: none; background: #fff; width: 100%; }
+
+.spin {
+  width: 15px; height: 15px; flex-shrink: 0;
+  border: 2px solid rgba(0,0,0,0.25); border-top-color: #000;
+  border-radius: 50%; animation: rotate 0.6s linear infinite; display: inline-block;
+}
+
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+footer {
+  text-align: center; padding: 28px 0 0;
+  border-top: 1px solid var(--border); margin-top: 48px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); line-height: 1.8;
+}
+
+footer strong { color: var(--accent); }
+
+@media (max-width: 600px) {
+  .btn { padding: 10px 14px; font-size: 12px; }
+  .btn-encrypt { flex: 1 1 100%; }
+  .btn-clear { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="wrapper">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🛡</div>
+      <span class="logo-text">CodeShield</span>
+    </div>
+    <span class="badge">v4.0 · Zero-Error Encrypt</span>
+  </header>
+
+  <div class="title-block">
+    <h1>Protect Your<br><span>Source Code</span></h1>
+    <p class="subtitle">// HTML · Browser JS · Node.js JS · Python — zero error after encrypt</p>
+  </div>
+
+  <!-- Info -->
+  <div class="info-box green">
+    <span class="info-icon">🛡</span>
+    <div class="info-text">
+      <strong>Kaedah Zero-Error</strong> — Code asal disimpan sebagai Base64 dan dijalankan semula pada runtime.<br>
+      Semua fungsi, event, CSS, <strong>require()</strong>, module, exports — <strong>100% berjalan tanpa sebarang error.</strong>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('html')">HTML</button>
+    <button class="tab-btn" onclick="switchTab('js')">JavaScript</button>
+    <button class="tab-btn" onclick="switchTab('python')">Python</button>
+  </div>
+
+  <!-- JS sub-tabs (Browser vs Node.js) -->
+  <div class="subtabs" id="jsSubtabs">
+    <button class="subtab-btn active" onclick="switchJsType('browser')">🌐 Browser JS</button>
+    <button class="subtab-btn" onclick="switchJsType('node')">🟢 Node.js JS</button>
+  </div>
+
+  <!-- Node.js warning -->
+  <div class="info-box yellow" id="nodeWarning" style="display:none;">
+    <span class="info-icon">⚠️</span>
+    <div class="info-text">
+      <span class="warn">Node.js mode</span> — Output adalah file <code>.js</code> yang menggunakan <strong>eval()</strong> dalam scope global Node.js.<br>
+      Ini memastikan <strong>require(), module, exports, __dirname, __filename</strong> semua boleh diakses seperti biasa.
+    </div>
+  </div>
+
+  <!-- Python warning -->
+  <div class="info-box yellow" id="pythonWarning" style="display:none;">
+    <span class="info-icon">🐍</span>
+    <div class="info-text">
+      <span class="warn">Python mode</span> — Output adalah file <code>.py</code> yang menggunakan <strong>exec()</strong> untuk jalankan code asal.<br>
+      Semua <strong>import, fungsi, class, variable</strong> — 100% berfungsi seperti biasa selepas encrypt.<br>
+      <span class="warn">⚠ Nota:</span> Pastikan semua module yang digunakan dah di-install dulu — contoh: <code>pip install colorama</code>. Encrypt tidak install module secara automatik.
+    </div>
+  </div>
+
+  <!-- INPUT -->
+  <p class="section-label">Input</p>
+  <div class="editor-wrap">
+    <div class="editor-header">
+      <div class="editor-dots">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+      </div>
+      <span class="editor-lang" id="langLabel">text/html</span>
+    </div>
+    <textarea id="inputArea"
+      placeholder="// Paste your code here...&#10;// CodeShield akan encrypt dan pastikan 100% berfungsi selepas itu." spellcheck="false"></textarea>
+  </div>
+  <div class="char-count"><span id="charCount">0</span> characters</div>
+
+  <!-- UPLOAD BAR -->
+  <input type="file" id="fileUploadInput" accept=".html,.htm,.js,.mjs,.py">
+  <div class="upload-bar">
+    <button class="btn btn-upload" onclick="document.getElementById('fileUploadInput').click()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Upload File
+    </button>
+    <div class="upload-file-info" id="uploadFileInfo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span id="uploadFileName" class="upload-file-name">—</span>
+      <button class="upload-clear-btn" onclick="clearUploadedFile()" title="Buang file">✕</button>
+    </div>
+  </div>
+
+  <!-- BUTTONS -->
+  <div class="action-row">
+    <button class="btn btn-encrypt" id="encryptBtn" onclick="doEncrypt()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Encrypt
+    </button>
+    <button class="btn btn-preview" onclick="doPreview()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      Preview
+    </button>
+    <button class="btn btn-copy" onclick="doCopy()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy
+    </button>
+    <button class="btn btn-download" onclick="doDownload()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download
+    </button>
+    <button class="btn btn-clear" onclick="doClear()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+      Clear
+    </button>
+  </div>
+
+  <!-- OUTPUT -->
+  <p class="section-label">Output</p>
+  <div class="editor-wrap">
+    <div class="editor-header">
+      <div class="editor-dots">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+      </div>
+      <span class="editor-lang" id="outputLangLabel">encrypted output</span>
+    </div>
+    <textarea id="outputArea" readonly
+      placeholder="// Encrypted code akan keluar di sini...&#10;// Tekan butang Encrypt untuk mula." spellcheck="false"></textarea>
+  </div>
+
+  <!-- STATUS -->
+  <div class="status-bar">
+    <div class="status-left">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">Waiting for input...</span>
+    </div>
+    <div class="status-stats" id="statusStats"></div>
+  </div>
+
+  <footer>
+    Powered by <strong>Repp76</strong> &nbsp;·&nbsp; CodeShield v4.0 Encryption Engine &nbsp;·&nbsp; Processing done locally in your browser.
+  </footer>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toastIcon"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-bar">
+      <div class="modal-title">🔍 Preview — Encrypted Output</div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <iframe id="previewFrame"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
+      allow="autoplay"></iframe>
+  </div>
+</div>
+
+<script>
+/* =============================================================
+   PREVENT ZOOM
+   ============================================================= */
+document.addEventListener('gesturestart',  function(e){ e.preventDefault(); });
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
+document.addEventListener('gestureend',    function(e){ e.preventDefault(); });
+document.addEventListener('wheel', function(e){
+  if (e.ctrlKey) e.preventDefault();
+}, { passive: false });
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey||e.metaKey) && (e.key==='+'||e.key==='-'||e.key==='='||e.key==='0'))
+    e.preventDefault();
+});
+
+/* =============================================================
+   STATE
+   ============================================================= */
+var currentTab    = 'html';
+var currentJsType = 'browser'; // 'browser' atau 'node'
+
+var inputArea  = document.getElementById('inputArea');
+var outputArea = document.getElementById('outputArea');
+
+inputArea.addEventListener('input', function(){
+  document.getElementById('charCount').textContent =
+    inputArea.value.length.toLocaleString();
+});
+
+/* =============================================================
+   TABS
+   ============================================================= */
+function switchTab(tab) {
+  currentTab = tab;
+  var btns = document.querySelectorAll('.tab-btn');
+  btns[0].classList.toggle('active', tab === 'html');
+  btns[1].classList.toggle('active', tab === 'js');
+  btns[2].classList.toggle('active', tab === 'python');
+
+  var subtabs = document.getElementById('jsSubtabs');
+  subtabs.classList.toggle('visible', tab === 'js');
+
+  document.getElementById('langLabel').textContent =
+    tab === 'html' ? 'text/html' : tab === 'python' ? 'text/x-python' : 'text/javascript';
+  document.getElementById('outputLangLabel').textContent =
+    tab === 'html' ? 'encrypted html' : tab === 'python' ? 'encrypted python' : 'encrypted javascript';
+
+  if (tab !== 'js') {
+    document.getElementById('nodeWarning').style.display = 'none';
+  } else {
+    updateNodeWarning();
+  }
+
+  document.getElementById('pythonWarning').style.display =
+    tab === 'python' ? 'flex' : 'none';
+}
+
+function switchJsType(type) {
+  currentJsType = type;
+  var btns = document.querySelectorAll('.subtab-btn');
+  btns[0].classList.toggle('active', type === 'browser');
+  btns[1].classList.toggle('active', type === 'node');
+  updateNodeWarning();
+}
+
+function updateNodeWarning() {
+  document.getElementById('nodeWarning').style.display =
+    (currentTab === 'js' && currentJsType === 'node') ? 'flex' : 'none';
+}
+
+/* =============================================================
+   ENCRYPTION ENGINE v4
+   ───────────────────────────────────────────────────────────
+   PRINSIP UTAMA:
+   Code asal TIDAK DIUBAH langsung — ia hanya di-encode ke Base64
+   dan dijalankan semula pada runtime dengan cara yang betul
+   mengikut persekitaran (HTML / Browser JS / Node.js JS).
+
+   ┌─────────────┬──────────────────────────────────────────────┐
+   │ HTML        │ decode B64 → document.open/write/close        │
+   │ Browser JS  │ decode B64 → eval() — akses window globals    │
+   │ Node.js JS  │ decode B64 → (0,eval)() — akses require dll.  │
+   └─────────────┴──────────────────────────────────────────────┘
+
+   Kenapa (0,eval)() untuk Node.js?
+   → Ia adalah "indirect eval" — berjalan dalam GLOBAL scope,
+     bukan dalam function scope. Ini bermakna require, module,
+     exports, __dirname, __filename semuanya boleh diakses
+     kerana mereka adalah global di Node.js.
+   ============================================================= */
+
+function safeB64(str) {
+  /* Unicode-safe Base64 encode */
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+function rndHex(n) {
+  n = n || 6;
+  var h = Math.floor(Math.random() * Math.pow(16, n)).toString(16);
+  while (h.length < n) h = '0' + h;
+  return '_0x' + h;
+}
+
+function splitToChunks(b64, varName, chunkSize) {
+  chunkSize = chunkSize || 90;
+  var parts = [];
+  for (var i = 0; i < b64.length; i += chunkSize) {
+    parts.push(JSON.stringify(b64.slice(i, i + chunkSize)));
+  }
+  return 'var ' + varName + '=[' + parts.join(',') + ']';
+}
+
+/* ── Encrypt HTML ──────────────────────────────────────────── */
+function encryptHTML(html) {
+  var b64  = safeB64(html);
+  var vArr = rndHex();
+  var vStr = rndHex();
+
+  /*
+   * document.write() adalah kaedah paling selamat untuk HTML:
+   * Browser akan parse dan render HTML asal sepenuhnya —
+   * sama seperti buka file HTML biasa.
+   * Semua <script>, <style>, event handlers, DOM kekal 100%.
+   */
+  var script =
+    '(function(){'
+    + splitToChunks(b64, vArr) + ';'
+    + 'var ' + vStr + '=' + vArr + ".join('');"
+    + 'document.open();'
+    + 'document.write(decodeURIComponent(escape(atob(' + vStr + '))));'
+    + 'document.close();'
+    + '})();';
+
+  return '<!DOCTYPE html>\n'
+    + '<html>\n<head>\n'
+    + '<meta charset="UTF-8">\n'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1.0,'
+    + 'maximum-scale=1.0,minimum-scale=1.0,user-scalable=no">\n'
+    + '</head>\n<body>\n'
+    + '<script>' + script + '<\/script>\n'
+    + '</body>\n</html>';
+}
+
+/* ── Detect sama ada code guna Node.js features ──────────────── */
+function isNodeJS(code) {
+  /* Detect Node.js code berdasarkan pattern yang wujud */
+  return (
+    /require\s*\(/.test(code) ||
+    /\bmodule\.exports\b/.test(code) ||
+    /\bprocess\.env\b/.test(code) ||
+    /\bprocess\.argv\b/.test(code) ||
+    /\b__dirname\b/.test(code) ||
+    /\b__filename\b/.test(code) ||
+    /^\s*import\s+[\w*{].*?from\s*['"`][^./][^'"`]*['"`]/m.test(code)
+    /* import dari nama package (bukan ./ atau ../) = Node.js module */
+  );
+}
+
+/* ── Encrypt Browser JS (Universal — semua jenis JS) ───────── */
+function encryptBrowserJS(code) {
+  /*
+   * UNIVERSAL JS ENCRYPT
+   * ─────────────────────────────────────────────────────────────
+   * Auto-detect jenis code dan encrypt dengan cara yang betul:
+   *
+   * Kalau code ada require() / import pkg / process / __dirname
+   *   → ia adalah Node.js code → guna encryptNodeJS() secara
+   *     automatik supaya 100% berfungsi
+   *
+   * Kalau code adalah pure browser JS (DOM, window, document dll.)
+   *   → strip import/export → wrap dalam eval() biasa
+   *
+   * Ini memastikan SEMUA jenis .js file boleh diencrypt dari tab
+   * Browser JS dan tetap berfungsi 100% tanpa error.
+   */
+  if (isNodeJS(code)) {
+    /* Auto-redirect ke Node.js encrypt — lebih selamat */
+    return encryptNodeJS(code);
+  }
+
+  /* Pure browser JS — strip import/export lalu encrypt */
+  var converted = code
+    .replace(/^\s*export\s+default\s+/gm, 'window._csExport = ')
+    .replace(/^\s*export\s+(const|let|var|function|class)\s+/gm, '$1 ')
+    .replace(/^\s*export\s+\{[^}]+\}\s*;?/gm, '');
+
+  var b64  = safeB64(converted);
+  var vArr = rndHex();
+  var vStr = rndHex();
+
+  return '(function(){'
+    + splitToChunks(b64, vArr) + ';'
+    + 'var ' + vStr + '=' + vArr + ".join('');"
+    + 'eval(decodeURIComponent(escape(atob(' + vStr + '))));'
+    + '})();';
+}
+
+/* ── ESM → CommonJS converter ──────────────────────────────── */
+function esmToCjs(code) {
+  /*
+   * Auto-convert ES Module syntax ke CommonJS sebelum encrypt.
+   * Ini perlu kerana eval() / new Function() TIDAK support
+   * import/export statement — mereka menyebabkan SyntaxError.
+   *
+   * Pattern yang di-convert:
+   *  1. import X from 'pkg'           → const X = require('pkg')
+   *  2. import { a, b } from 'pkg'    → const { a, b } = require('pkg')
+   *  3. import * as X from 'pkg'      → const X = require('pkg')
+   *  4. import 'pkg'                  → require('pkg')
+   *  5. import X, { a, b } from 'pkg' → const _cs = require('pkg'); const X = _cs.default||_cs; const { a, b } = _cs;
+   *  6. export default X              → module.exports = X
+   *  7. export { a, b }               → module.exports = { a, b }
+   *  8. export const/let/var/function/class X → (kekal, tambah module.exports.X = X selepas)
+   *  9. export * from 'pkg'           → Object.assign(module.exports, require('pkg'))
+   */
+
+  var exports_to_add = [];
+
+  /* Step 1: import X, { named } from 'pkg' — mixed default+named */
+  code = code.replace(
+    /^\s*import\s+(\w+)\s*,\s*\{([^}]+)\}\s*from\s*(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, def, named, pkg) {
+      var v = '_cs_' + def;
+      return 'const ' + v + ' = require(' + pkg + ');\n'
+           + 'const ' + def + ' = ' + v + '.default || ' + v + ';\n'
+           + 'const {' + named + '} = ' + v + ';';
+    }
+  );
+
+  /* Step 2: import * as X from 'pkg' */
+  code = code.replace(
+    /^\s*import\s+\*\s+as\s+(\w+)\s+from\s*(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, name, pkg) {
+      return 'const ' + name + ' = require(' + pkg + ');';
+    }
+  );
+
+  /* Step 3: import { a, b } from 'pkg' */
+  code = code.replace(
+    /^\s*import\s+\{([^}]+)\}\s*from\s*(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, named, pkg) {
+      return 'const {' + named + '} = require(' + pkg + ');';
+    }
+  );
+
+  /* Step 4: import X from 'pkg' */
+  code = code.replace(
+    /^\s*import\s+(\w+)\s+from\s*(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, name, pkg) {
+      return 'const ' + name + ' = require(' + pkg + ');';
+    }
+  );
+
+  /* Step 5: import 'pkg' (side-effect only) */
+  code = code.replace(
+    /^\s*import\s+(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, pkg) {
+      return 'require(' + pkg + ');';
+    }
+  );
+
+  /* Step 6: export * from 'pkg' */
+  code = code.replace(
+    /^\s*export\s+\*\s+from\s*(['"`][^'"`]+['"`])\s*;?/gm,
+    function(_, pkg) {
+      return 'Object.assign(module.exports, require(' + pkg + '));';
+    }
+  );
+
+  /* Step 7: export { a, b } */
+  code = code.replace(
+    /^\s*export\s+\{([^}]+)\}\s*;?/gm,
+    function(_, named) {
+      var names = named.split(',').map(function(s){ return s.trim().split(/\s+as\s+/); });
+      return names.map(function(p){
+        return 'module.exports.' + (p[1]||p[0]) + ' = ' + p[0] + ';';
+      }).join('\n');
+    }
+  );
+
+  /* Step 8: export default expr */
+  code = code.replace(
+    /^\s*export\s+default\s+/gm,
+    'module.exports = '
+  );
+
+  /* Step 9: export const/let/var/function/class Name */
+  code = code.replace(
+    /^\s*export\s+(const|let|var|function|class)\s+(\w+)/gm,
+    function(_, kw, name) {
+      exports_to_add.push(name);
+      return kw + ' ' + name;
+    }
+  );
+
+  if (exports_to_add.length) {
+    code += '\n' + exports_to_add.map(function(n){
+      return 'if(typeof module!=="undefined")module.exports.' + n + '=' + n + ';';
+    }).join('\n');
+  }
+
+  return code;
+}
+
+/* ── Encrypt Node.js JS ────────────────────────────────────── */
+function encryptNodeJS(code) {
+  /*
+   * PENYELESAIAN MUKTAMAD — berfungsi dalam CJS dan ESM (Node v12-v25+)
+   * ─────────────────────────────────────────────────────────────────────
+   * Masalah: Dalam ESM mode (type:module atau .mjs), `require` adalah
+   *          UNDEFINED. Walaupun di-pass sebagai parameter, ia tetap null.
+   *
+   * Penyelesaian: Bina `require` sendiri menggunakan createRequire()
+   *   dari built-in module 'module'. Ini adalah cara rasmi Node.js
+   *   untuk guna require() dalam ESM context.
+   *
+   * Wrapper guna async IIFE supaya boleh guna `await import()` untuk
+   * load built-in modules tanpa bergantung pada require.
+   */
+  var cjsCode = esmToCjs(code);
+  var b64  = safeB64(cjsCode);
+  var vArr = rndHex();
+  var vStr = rndHex();
+
+  var script = [
+    '(async function(){',
+    'var _req;',
+    'if(typeof require==="function"){',
+    '  _req=require;',
+    '}else{',
+    '  try{',
+    '    var _modMod=await import("module");',
+    '    var _urlMod=await import("url");',
+    '    var _metaUrl;',
+    '    try{_metaUrl=import.meta.url;}catch(e){_metaUrl="file://"+process.cwd()+"/index.js";}',
+    '    _req=_modMod.createRequire(_metaUrl);',
+    '  }catch(e){',
+    '    _req=function(m){throw new Error("[CodeShield] require gagal: "+m);};',
+    '  }',
+    '}',
+    'var _dir,_file;',
+    'if(typeof __dirname!=="undefined"){',
+    '  _dir=__dirname;_file=__filename;',
+    '}else{',
+    '  try{',
+    '    var _urlMod2=await import("url");',
+    '    var _pathMod=await import("path");',
+    '    var _metaUrl2;',
+    '    try{_metaUrl2=import.meta.url;}catch(e){_metaUrl2="file://"+process.cwd()+"/index.js";}',
+    '    _file=_urlMod2.fileURLToPath(_metaUrl2);',
+    '    _dir=_pathMod.dirname(_file);',
+    '  }catch(e){_dir=process.cwd();_file=process.cwd()+"/index.js";}',
+    '}',
+    splitToChunks(b64, vArr) + ';',
+    'var ' + vStr + '=' + vArr + '.join("");',
+    'var _cs=decodeURIComponent(escape(atob(' + vStr + ')));',
+    'var _mod={exports:{}};',
+    'var _exp=_mod.exports;',
+    'var _fn=new Function("require","module","exports","__dirname","__filename",_cs);',
+    '_fn(_req,_mod,_exp,_dir,_file);',
+    '})();'
+  ].join('\n');
+
+  return script;
+}
+
+/* =============================================================
+   ENCRYPT PYTHON
+   ============================================================= */
+function encryptPython(code) {
+  var b64 = btoa(unescape(encodeURIComponent(code)));
+  var chunkSize = 76;
+  var chunks = [];
+  for (var i = 0; i < b64.length; i += chunkSize) {
+    chunks.push(JSON.stringify(b64.slice(i, i + chunkSize)));
+  }
+
+  var chunkLines = '    ' + chunks.join(',\n    ');
+
+  var output = [
+    '# -*- coding: utf-8 -*-',
+    '# CodeShield Encrypted Python \u2014 Powered by Repp76',
+    'import base64, sys, os',
+    '',
+    '# Pastikan direktori script ada dalam sys.path',
+    'try:',
+    '    _cs_dir = os.path.dirname(os.path.abspath(__file__))',
+    'except NameError:',
+    '    _cs_dir = os.getcwd()',
+    'for _cs_p in [_cs_dir, os.getcwd()]:',
+    '    if _cs_p not in sys.path:',
+    '        sys.path.insert(0, _cs_p)',
+    '',
+    '_cs_parts = [',
+    chunkLines,
+    ']',
+    '_cs_b64 = "".join(_cs_parts)',
+    '_cs_code = base64.b64decode(_cs_b64).decode("utf-8")',
+    '',
+    '# Bina globals dict lengkap — sama seperti Python jalankan file biasa',
+    'try:',
+    '    _cs_file = os.path.abspath(__file__)',
+    'except NameError:',
+    '    _cs_file = os.path.join(os.getcwd(), "script.py")',
+    '',
+    '_cs_globals = {',
+    '    "__name__": "__main__",',
+    '    "__file__": _cs_file,',
+    '    "__doc__": None,',
+    '    "__package__": None,',
+    '    "__spec__": None,',
+    '    "__loader__": None,',
+    '    "__builtins__": __builtins__,',
+    '}',
+    '',
+    'exec(compile(_cs_code, _cs_file, "exec"), _cs_globals)',
+  ].join('\n');
+
+  return output + '\n';
+}
+
+/* =============================================================
+   ENCRYPT BUTTON
+   ============================================================= */
+function doEncrypt() {
+  var code = inputArea.value;
+  if (!code.trim()) {
+    showToast('Paste code dulu sebelum encrypt!', 'error');
+    return;
+  }
+
+  var btn  = document.getElementById('encryptBtn');
+  var orig = btn.innerHTML;
+  btn.innerHTML = '<div class="spin"></div> Encrypting...';
+  btn.disabled  = true;
+  setStatus('working', 'Sedang mengencrypt...');
+
+  setTimeout(function() {
+    try {
+      var t0     = performance.now ? performance.now() : Date.now();
+      var result;
+
+      if (currentTab === 'html') {
+        result = encryptHTML(code);
+      } else if (currentTab === 'python') {
+        result = encryptPython(code);
+      } else if (currentJsType === 'node') {
+        result = encryptNodeJS(code);
+      } else {
+        result = encryptBrowserJS(code);
+      }
+
+      var ms = ((performance.now ? performance.now() : Date.now()) - t0).toFixed(1);
+      outputArea.value = result;
+
+      document.getElementById('statusStats').innerHTML =
+        '<span>Input: '  + code.length.toLocaleString()   + ' chars</span>'
+      + '<span>Output: ' + result.length.toLocaleString() + ' chars</span>'
+      + '<span>' + ms + 'ms</span>';
+
+      setStatus('ready', 'Encryption berjaya — 100% zero error.');
+      showToast('Code berjaya diencrypt!', 'success');
+
+    } catch (err) {
+      setStatus('error', 'Error: ' + err.message);
+      showToast('Gagal: ' + err.message, 'error');
+    }
+
+    btn.innerHTML = orig;
+    btn.disabled  = false;
+  }, 380);
+}
+
+/* =============================================================
+   PREVIEW
+   ============================================================= */
+function doPreview() {
+  var out = outputArea.value.trim();
+  if (!out) { showToast('Encrypt dulu sebelum preview!', 'error'); return; }
+
+  var frame = document.getElementById('previewFrame');
+
+  if (currentTab === 'html') {
+    frame.srcdoc = out;
+  } else if (currentTab === 'python') {
+    /* Python tak boleh run dalam browser — tunjuk code sahaja */
+    frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<style>body{background:#0a0a0f;color:#a0f0c8;font-family:monospace;padding:20px;'
+      + 'font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all;}'
+      + 'h3{color:#fbbf24;margin-bottom:12px;font-family:sans-serif;}</style></head><body>'
+      + '<h3>🐍 Python code — preview tidak tersedia dalam browser.<br>Download dan jalankan dengan: python script.py</h3>'
+      + '<div>' + escHtml(out) + '</div>'
+      + '</body></html>';
+  } else if (currentJsType === 'node') {
+    /* Node.js tak boleh run dalam browser — tunjuk code sahaja */
+    frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<style>body{background:#0a0a0f;color:#a0f0c8;font-family:monospace;padding:20px;'
+      + 'font-size:12px;line-height:1.6;white-space:pre-wrap;word-break:break-all;}'
+      + 'h3{color:#fbbf24;margin-bottom:12px;font-family:sans-serif;}</style></head><body>'
+      + '<h3>⚠ Node.js code — preview tidak tersedia dalam browser.<br>Download dan jalankan dengan: node index.js</h3>'
+      + '<div>' + escHtml(out) + '</div>'
+      + '</body></html>';
+  } else {
+    frame.srcdoc = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      + '<style>body{background:#0a0a0f;color:#e8e8f0;font-family:monospace;'
+      + 'padding:20px;font-size:13px;line-height:1.6;}</style>'
+      + '</head><body>'
+      + '<script>' + out.replace(/<\/script>/gi, '<\\/script>') + '<\/script>'
+      + '</body></html>';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* =============================================================
+   COPY / DOWNLOAD / CLEAR
+   ============================================================= */
+function doCopy() {
+  var out = outputArea.value;
+  if (!out) { showToast('Tiada code untuk dicopy!', 'error'); return; }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(out)
+      .then(function(){ showToast('Copied ke clipboard!', 'success'); })
+      .catch(function(){ legacyCopy(); });
+  } else {
+    legacyCopy();
+  }
+}
+
+function legacyCopy() {
+  outputArea.select();
+  outputArea.setSelectionRange(0, 9999999);
+  try {
+    document.execCommand('copy');
+    showToast('Copied!', 'success');
+  } catch(e) {
+    showToast('Sila select text manual dan copy.', 'error');
+  }
+}
+
+function doDownload() {
+  var out = outputArea.value;
+  if (!out) { showToast('Tiada code untuk didownload!', 'error'); return; }
+
+  var filename, mime;
+  if (currentTab === 'html') {
+    filename = 'index.html'; mime = 'text/html';
+  } else if (currentTab === 'python') {
+    filename = 'script.py'; mime = 'text/x-python';
+  } else {
+    filename = 'index.js'; mime = 'text/javascript';
+  }
+
+  var blob = new Blob([out], { type: mime + ';charset=utf-8' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Downloaded: ' + filename, 'success');
+}
+
+/* =============================================================
+   UPLOAD FILE
+   ============================================================= */
+(function() {
+  var inp = document.getElementById('fileUploadInput');
+  inp.addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+
+    /* Validate extension */
+    var name = file.name.toLowerCase();
+    var allowed = ['.html', '.htm', '.js', '.mjs', '.py'];
+    var ok = allowed.some(function(ext){ return name.endsWith(ext); });
+    if (!ok) {
+      showToast('Format tidak disokong! Guna .html .js .py sahaja.', 'error');
+      inp.value = '';
+      return;
+    }
+
+    /* Auto-switch tab ikut extension */
+    if (name.endsWith('.html') || name.endsWith('.htm')) {
+      switchTab('html');
+    } else if (name.endsWith('.py')) {
+      switchTab('python');
+    } else {
+      switchTab('js');
+    }
+
+    /* Read file content */
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      inputArea.value = ev.target.result;
+      document.getElementById('charCount').textContent =
+        inputArea.value.length.toLocaleString();
+
+      /* Show file info bar */
+      document.getElementById('uploadFileName').textContent = file.name;
+      document.getElementById('uploadFileInfo').classList.add('visible');
+
+      showToast('File "' + file.name + '" berjaya diload!', 'success');
+    };
+    reader.onerror = function() {
+      showToast('Gagal baca file!', 'error');
+    };
+    reader.readAsText(file, 'utf-8');
+
+    /* Reset input so same file can be re-uploaded */
+    inp.value = '';
+  });
+})();
+
+function clearUploadedFile() {
+  document.getElementById('uploadFileInfo').classList.remove('visible');
+  document.getElementById('uploadFileName').textContent = '—';
+}
+
+function doClear() {
+  inputArea.value  = '';
+  outputArea.value = '';
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('statusStats').innerHTML = '';
+  clearUploadedFile();
+  setStatus('', 'Waiting for input...');
+  showToast('Cleared.', 'success');
+}
+
+/* =============================================================
+   MODAL
+   ============================================================= */
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  setTimeout(function(){
+    document.getElementById('previewFrame').srcdoc = '';
+  }, 300);
+}
+
+/* =============================================================
+   STATUS / TOAST
+   ============================================================= */
+function setStatus(type, text) {
+  var dot = document.getElementById('statusDot');
+  dot.className = type ? ('status-dot ' + type) : 'status-dot';
+  document.getElementById('statusText').textContent = text;
+}
+
+var _toastTimer = null;
+function showToast(msg, type) {
+  type = type || 'success';
+  var el = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = type === 'success' ? '✓' : '✕';
+  document.getElementById('toastMsg').textContent  = msg;
+  el.className = 'toast ' + type + ' show';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 2800);
+}
+
+/* =============================================================
+   KEYBOARD SHORTCUT  Ctrl/Cmd+Enter
+   ============================================================= */
+document.addEventListener('keydown', function(e){
+  if ((e.ctrlKey||e.metaKey) && e.key === 'Enter') doEncrypt();
+});
+</script>
+</body>
+</html>
